@@ -1,2 +1,1 @@
-# alx-system_engineering-devops
-my shell project permisison
+Task 0 where am i
