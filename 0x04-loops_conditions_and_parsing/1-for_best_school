@@ -1,7 +1,6 @@
-#!/usr/bin/env bash
-# displays "Best School" 10 times.
-
-for ((i = 0; i < 10; i++))
+cript that displays Best School 10 times
+for i in {0..9}
 do
-    echo "Best School"
-done
+		echo "Best School"
+	done
+	export i
