@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# This script is displaying "Holberton School" 10 times
+# prints a string 10 times using while loop 
 
-i=1
-while [ $i -le 10 ]; do
-	echo "Best School"
-		((i++))
-		done
+i=0
+
+while [ "$i" -lt 10 ]; do
+  echo "Best School"
+  ((i++))
+done
