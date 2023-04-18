@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+#Runs the Whoami commaand under the user and passed as argument
+sudo -u "$1" whoami
