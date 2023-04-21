@@ -47,5 +47,5 @@ frontend get-murad-frontend-https
 
 backend get-murad-backend
         balance roundrobin
-        server 151666-web-01 54.208.31.23:80 check
-        server 151666-web-02 54.237.98.251:80 check
+        server 151666-web-01 54.198.64.137:80 check
+        server 151666-web-02 54.90.28.248:80 check
