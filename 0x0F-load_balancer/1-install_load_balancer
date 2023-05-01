@@ -32,14 +32,14 @@ defaults
    timeout server  10000
 
 frontend www-https
-    bind   0.0.0.0:80
+    bind 127.0.0.0:8000
     option forwardfor
     default_backend www-backend
 
 backend www-backend
     balance  roundrobin
-    server 114742-web-01 54.198.64.137:80 check
-    server 114742-web-02 54.90.28.248:80 check
+    server 114742-web-01 54.198.64.137:8000 check
+    server 114742-web-02 54.90.28.248:8000 check
 " | sudo tee /etc/haproxy/haproxy.cfg
 
 sudo service haproxy restart
