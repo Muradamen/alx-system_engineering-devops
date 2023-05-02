@@ -23,11 +23,12 @@ frontend www-https
     stats uri /haproxy?stats
     option forwardfor
     default_backend www-backend
-
+=======
 frontend get-murad-frontend-https
         bind *:443 ssl crt /etc/haproxy/certs/get-murad.tech.pem
         http-request set-header X-Forwarded-Proto https
         default_backend get-murad-backend
+>>>>>>> 83a22c6f0cac8a97b976065c810d3c333493c15a
 
 backend www-backend
     balance  roundrobin
