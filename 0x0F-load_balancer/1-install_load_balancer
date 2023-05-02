@@ -1,45 +1,57 @@
 #!/usr/bin/env bash
-# Install and configure HAproxy on your lb-01 server.
+# install load balancer
 
-sudo apt-get install -y software-properties-common
-sudo add-apt-repository -y ppa:vbernat/haproxy-2.6
 
-sudo apt-get -y update
-sudo apt-get -y install haproxy
+echo -e "Updating and doing some minor checks...\n"
 
-sudo chown -R "$USER":"$USER" /etc/default/haproxy
-sudo chown -R "$USER":"$USER" /etc/haproxy/haproxy.cfg
+function install() {
+	command -v "$1" &> /dev/null
 
-sudo echo "ENABLED=1" > /etc/default/haproxy
-sudo mv /etc/haproxy/haproxy.cfg{,.original}
-sudo touch /etc/haproxy/haproxy.cfg
+	#shellcheck disable=SC2181
+	if [ $? -ne 0 ]; then
+		echo -e "	Installing: $1\n"
+		sudo apt-get update -y -qq && \
+			sudo apt-get install -y "$1" -qq
+		echo -e "\n"
+	else
+		echo -e "	${1} is already installed.\n"
+	fi
+}
 
-echo "global
-   log 127.0.0.1 local0 notice
-   maxconn 2000
-   user haproxy
-   group haproxy
+install haproxy #install haproxy
 
+echo -e "\nSetting up some minor stuff.\n"
+
+# backup default server config file
+sudo cp /etc/haproxy/haproxy.cfg haproxy_default.backup
+
+server_config=\
+"
 defaults
-   log   global
-   mode  http
-   option  httplog
-   option  dontlognull
-   retries 3
-   option redispatch
-   timeout connect  5000
-   timeout client  10000
-   timeout server  10000
+  mode http
+  timeout client 15s
+  timeout connect 10s
+  timeout server 15s
+  timeout http-request 10s
 
-frontend www-https
-    bind 127.0.0.0:8000
-    option forwardfor
-    default_backend www-backend
+frontend  get-murad-tech-frontend
+    bind *:80
+    default_backend  get-murad-tech-backend
 
-backend www-backend
-    balance  roundrobin
-    server 114742-web-01 54.198.64.137:8000 check
-    server 114742-web-02 54.90.28.248:8000 check
-" | sudo tee /etc/haproxy/haproxy.cfg
+backend get-murad-tech-backend
+    balance roundrobin
+    server 114742-web-01 54.198.64.137:80 check
+    server 114742-web-02 54.90.28.248:80 check
+"
 
-sudo service haproxy restart
+# shellcheck disable=SC2154
+echo "$server_config" | sudo dd status=none of=/etc/haproxy/haproxy.cfg
+
+# enable haproxy to be started by init script
+echo "ENABLED=1" | sudo dd status=none of=/etc/default/haproxy
+
+if [ "$(pgrep -c haproxy)" -le 0 ]; then
+	sudo service haproxy start
+else
+	sudo service haproxy restart
+fi
