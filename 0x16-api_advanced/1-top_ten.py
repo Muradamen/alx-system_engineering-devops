@@ -1,36 +1,47 @@
-#!/usr/bin/python3
-"""
-Function that queries the Reddit API and prints
-the top ten hot posts of a subreddit
-"""
 import requests
-import sys
 
+def number_of_subscribers(subreddit):
+  """
+  This function queries the Reddit API and returns the number of subscribers for a given subreddit.
 
-def top_ten(subreddit):
-    """ Queries to Reddit API """
-    u_agent = 'Mozilla/5.0'
+  Args:
+      subreddit: The name of the subreddit (without the 'r/').
 
-    headers = {
-        'User-Agent': u_agent
-    }
+  Returns:
+      The number of subscribers for the subreddit, or 0 if the subreddit is invalid.
+  """
 
-    params = {
-        'limit': 10
-    }
+  # Base URL for subreddit information
+  url = f"https://www.reddit.com/r/{subreddit}/about.json?limit=0"  # limit=0 avoids extra data
 
-    url = "https://www.reddit.com/r/{}/hot.json".format(subreddit)
-    res = requests.get(url,
-                       headers=headers,
-                       params=params,
-                       allow_redirects=False)
-    if res.status_code != 200:
-        print(None)
-        return
-    dic = res.json()
-    hot_posts = dic['data']['children']
-    if len(hot_posts) is 0:
-        print(None)
-    else:
-        for post in hot_posts:
-            print(post['data']['title'])
+  # Set a custom User-Agent header to avoid throttling
+  headers = {"User-Agent": "My Reddit API Client v1.0 (by /u/your_username)"}
+
+  # Send the GET request without following redirects
+  try:
+    response = requests.get(url, headers=headers, allow_redirects=False)
+    response.raise_for_status()  # Raise an exception for non-200 status codes
+  except requests.exceptions.RequestException:
+    # Handle any request errors (e.g., network issues)
+    return 0
+
+  # Parse the JSON response
+  data = response.json()
+
+  # Check if the subreddit exists (data key 'data' may be missing for invalid subreddits)
+  if 'data' not in data:
+    return 0
+
+  # Extract the subscriber count
+  subscribers = data['data'].get('subscribers', 0)
+
+  return subscribers
+
+# Example usage
+subreddit_name = "learnpython"
+number_of_subs = number_of_subscribers(subreddit_name)
+
+if number_of_subs > 0:
+  print(f"The subreddit r/{subreddit_name} has {number_of_subs} subscribers.")
+else:
+  print(f"Subreddit r/{subreddit_name} is invalid or not found.")
